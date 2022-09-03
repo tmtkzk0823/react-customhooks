@@ -15,7 +15,12 @@ import { useState } from "react";
 
 export default function App() {
   const [userProfiles, setUserProfiles] = useState<Array<UserProfile>>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const onClickFechUser = () => {
+    setLoading(true);
+    setError(false);
+
     axios
       .get<Array<User>>("https://jsonplaceholder.typicode.com/users")
       .then((res) => {
@@ -26,14 +31,29 @@ export default function App() {
           address: `${user.address.street}${user.address.suite}${user.address.city}`
         }));
         setUserProfiles(data);
+      })
+      .catch(() => {
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
   return (
     <div className="App">
       <button onClick={onClickFechUser}>データ取得</button>
-      {userProfiles.map((user) => (
-        <UserCard key={user.id} user={user} />
-      ))}
+      <br />
+      {error ? (
+        <p style={{ color: "red" }}>データの取得失敗！！！！！！！！！</p>
+      ) : loading ? (
+        <p>Loding...</p>
+      ) : (
+        <>
+          {userProfiles.map((user) => (
+            <UserCard key={user.id} user={user} />
+          ))}
+        </>
+      )}
     </div>
   );
 }
